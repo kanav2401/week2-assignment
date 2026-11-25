@@ -1,122 +1,231 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useEffect, useState } from "react";
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Link,
+  useLocation
+} from "react-router-dom";
+
+import {
+  Home,
+  AlertCircle,
+  ArrowLeft
+} from "lucide-react";
+
+// Layout components
+import Sidebar from "./components/sidebar";
+import Navbar from "./components/Navbar";
+
+// Application pages
+import Dashboard from "./pages/Dashboard";
+import Employees from "./pages/Employees";
+import AddEmployee from "./pages/AddEmployee";
+
+// Application styles
+import "./styles/App.css";
+import "./styles/components.css";
+
+// Scroll to top when navigating between pages
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant"
+    });
+  }, [pathname]);
+
+  return null;
+};
+
+// Page not found component
+const NotFound = () => {
+  return (
+    <div className="not-found-page">
+      <div className="card not-found-card">
+        <div className="not-found-icon">
+          <AlertCircle
+            size={60}
+            strokeWidth={1.5}
+          />
+        </div>
+
+        <h1 className="not-found-code">
+          404
+        </h1>
+
+        <h2>Page Not Found</h2>
+
+        <p>
+          The page you are looking for does not
+          exist or may have been moved.
+        </p>
+
+        <div className="not-found-actions">
+          <Link
+            to="/"
+            className="btn btn-primary"
+          >
+            <Home size={18} />
+
+            Go to Dashboard
+          </Link>
+
+          <Link
+            to="/employees"
+            className="btn btn-secondary"
+          >
+            <ArrowLeft size={18} />
+
+            View Employees
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main application layout
+const AppLayout = () => {
+  const [sidebarOpen, setSidebarOpen] =
+    useState(false);
+
+  const location = useLocation();
+
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
+
+  // Close sidebar when Escape is pressed
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener(
+      "keydown",
+      handleKeyDown
+    );
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleKeyDown
+      );
+    };
+  }, []);
+
+  // Open mobile sidebar
+  const handleOpenSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  // Close mobile sidebar
+  const handleCloseSidebar = () => {
+    setSidebarOpen(false);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div className="app-layout">
+      {/* Application sidebar */}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={handleCloseSidebar}
+      />
+
+      {/* Main application content */}
+      <div className="app-main">
+        {/* Top navigation bar */}
+        <Navbar
+          onMenuClick={handleOpenSidebar}
+        />
+
+        {/* Scroll restoration */}
+        <ScrollToTop />
+
+        {/* Page content */}
+        <main
+          className="app-content"
+          id="main-content"
         >
-          Count is {count}
-        </button>
-      </section>
+          <Routes>
+            {/* Dashboard page */}
+            <Route
+              path="/"
+              element={<Dashboard />}
+            />
 
-      <div className="ticks"></div>
+            {/* Employee directory */}
+            <Route
+              path="/employees"
+              element={<Employees />}
+            />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+            {/* Add employee page */}
+            <Route
+              path="/employees/add"
+              element={
+                <AddEmployee key="add-employee" />
+              }
+            />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+            {/* Edit employee page */}
+            <Route
+              path="/employees/edit/:id"
+              element={
+                <AddEmployee key="edit-employee" />
+              }
+            />
 
-export default App
+            {/* Invalid route */}
+            <Route
+              path="*"
+              element={<NotFound />}
+            />
+          </Routes>
+        </main>
+
+        {/* Application footer */}
+        <footer className="app-footer">
+          <div className="app-footer-left">
+            <p>
+              © {new Date().getFullYear()} StaffHub.
+              All rights reserved.
+            </p>
+          </div>
+
+          <div className="app-footer-right">
+            <span>
+              Employee Management System
+            </span>
+
+            <span className="footer-separator">
+              |
+            </span>
+
+            <span>Version 1.0.0</span>
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+};
+
+// Root application component
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
+  );
+};
+
+export default App;
