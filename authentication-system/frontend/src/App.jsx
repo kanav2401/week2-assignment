@@ -1,122 +1,201 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+import { useEffect } from "react";
+
+import {
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+
+// ========================================
+// IMPORT APPLICATION PAGES
+// ========================================
+
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
+
+// ========================================
+// IMPORT ROUTE PROTECTION COMPONENTS
+// ========================================
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
+
+// ========================================
+// IMPORT GLOBAL STYLES
+// ========================================
+
+import "./styles/index.css";
+import "./styles/App.css";
+import "./styles/auth.css";
+import "./styles/dashboard.css";
+
+// ========================================
+// SCROLL TO TOP COMPONENT
+// ========================================
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  }, [pathname]);
+
+  return null;
+};
+
+// ========================================
+// PAGE TITLE MANAGEMENT
+// ========================================
+
+const PageTitle = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const pageTitles = {
+      "/": "SecureAuth | Secure Authentication Platform",
+      "/login": "Sign In | SecureAuth",
+      "/register": "Create Account | SecureAuth",
+      "/dashboard": "Dashboard | SecureAuth",
+      "/profile": "My Profile | SecureAuth",
+    };
+
+    const normalizedPath =
+      pathname.replace(/\/+$/, "") || "/";
+
+    document.title =
+      pageTitles[normalizedPath] ||
+      "Page Not Found | SecureAuth";
+  }, [pathname]);
+
+  return null;
+};
+
+// ========================================
+// SAFE AUTHENTICATION REDIRECT
+// ========================================
+
+const GuestOnlyRoute = () => {
+  const location = useLocation();
+
+  const previousLocation = location.state?.from;
+
+  const allowedPaths = [
+    "/dashboard",
+    "/profile",
+  ];
+
+  let redirectTo = "/dashboard";
+
+  if (
+    previousLocation &&
+    typeof previousLocation === "object" &&
+    allowedPaths.includes(previousLocation.pathname)
+  ) {
+    redirectTo = {
+      pathname: previousLocation.pathname,
+      search: previousLocation.search || "",
+      hash: previousLocation.hash || "",
+    };
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <PublicRoute redirectTo={redirectTo} />
+  );
+};
 
-      <div className="ticks"></div>
+// ========================================
+// MAIN APPLICATION COMPONENT
+// ========================================
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+const App = () => {
+  return (
+    <div className="app">
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
-}
+      {/* Reset scroll position on navigation */}
 
-export default App
+      <ScrollToTop />
+
+      {/* Update browser tab title */}
+
+      <PageTitle />
+
+      {/* Application routes */}
+
+      <Routes>
+
+        {/* ========================================
+            PUBLIC ROUTES
+        ======================================== */}
+
+        <Route
+          path="/"
+          element={<Home />}
+        />
+
+        {/* ========================================
+            GUEST-ONLY ROUTES
+
+            Authenticated users are redirected
+            to the dashboard or requested page.
+        ======================================== */}
+
+        <Route element={<GuestOnlyRoute />}>
+
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+        </Route>
+
+        {/* ========================================
+            PROTECTED ROUTES
+
+            Only authenticated users can
+            access these pages.
+        ======================================== */}
+
+        <Route element={<ProtectedRoute />}>
+
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+        </Route>
+
+        {/* ========================================
+            NOT FOUND ROUTE
+        ======================================== */}
+
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
+
+      </Routes>
+
+    </div>
+  );
+};
+
+export default App;
